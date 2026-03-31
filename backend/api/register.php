@@ -1,34 +1,42 @@
 <?php
-// register.php
-header("Content-Type: application/json; charset=UTF-8");
-include 'koneksi.php';
+header('Content-Type: application/json');
+// Sesuaikan path ke file koneksi milikmu
+require_once '../config/koneksi.php'; 
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $data = json_decode(file_get_contents("php://input"), true);
-    
-    if (isset($data['username']) && isset($data['password'])) {
-        $user = $conn->real_escape_string($data['username']);
-        $email = isset($data['email']) ? $conn->real_escape_string($data['email']) : '';
-        $pass = password_hash($data['password'], PASSWORD_DEFAULT);
-        
-        // Membuat API KEY unik (Ini yang diminta soal UTS)
-        $api_key = "KOPI-" . bin2hex(random_bytes(8)); 
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    echo json_encode(["status" => "error", "message" => "Method not allowed. Gunakan POST."]);
+    exit;
+}
 
-        $sql = "INSERT INTO users (username, email, password, api_key) VALUES ('$user', '$email', '$pass', '$api_key')";
-        
-        if ($conn->query($sql) === TRUE) {
-            echo json_encode([
-                "status" => "success",
-                "message" => "User berhasil didaftarkan",
-                "api_key" => $api_key // Tampilkan agar bisa dicopy user
-            ]);
-        } else {
-            echo json_encode(["status" => "error", "message" => $conn->error]);
-        }
-    } else {
-        echo json_encode(["status" => "error", "message" => "Data tidak lengkap"]);
-    }
+$username = isset($_POST['username']) ? mysqli_real_escape_string($conn, $_POST['username']) : '';
+$email = isset($_POST['email']) ? mysqli_real_escape_string($conn, $_POST['email']) : '';
+$password = isset($_POST['password']) ? $_POST['password'] : '';
+
+if (empty($username) || empty($email) || empty($password)) {
+    http_response_code(400);
+    echo json_encode(["status" => "error", "message" => "Username, email, dan password wajib diisi!"]);
+    exit;
+}
+
+$cek_query = "SELECT * FROM users WHERE username = '$username' OR email = '$email'";
+$cek_result = mysqli_query($conn, $cek_query);
+
+if (mysqli_num_rows($cek_result) > 0) {
+    http_response_code(409);
+    echo json_encode(["status" => "error", "message" => "Username atau email sudah terdaftar!"]);
+    exit;
+}
+
+$hashed_password = password_hash($password, PASSWORD_DEFAULT);
+
+$sql = "INSERT INTO users (username, email, password) VALUES ('$username', '$email', '$hashed_password')";
+
+if (mysqli_query($conn, $sql)) {
+    http_response_code(201);
+    echo json_encode(["status" => "success", "message" => "Registrasi berhasil! Silakan login untuk mendapatkan API KEY."]);
 } else {
-    echo json_encode(["status" => "error", "message" => "Metode harus POST"]);
+    http_response_code(500);
+    echo json_encode(["status" => "error", "message" => "Terjadi kesalahan database: " . mysqli_error($conn)]);
 }
 ?>
