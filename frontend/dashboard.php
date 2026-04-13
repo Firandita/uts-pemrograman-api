@@ -1,6 +1,16 @@
 <?php
 declare(strict_types=1);
 
+session_start();
+
+if (empty($_SESSION['auth_logged_in'])) {
+	header('Location: login.php');
+	exit;
+}
+
+$sessionApiKey = isset($_SESSION['api_key']) ? (string)$_SESSION['api_key'] : '';
+$sessionUsername = isset($_SESSION['username']) ? (string)$_SESSION['username'] : 'User';
+
 function base_url(): string
 {
 	$scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
@@ -143,6 +153,38 @@ if ($apiDir !== false) {
 		.top {
 			text-align: center;
 			margin-bottom: 22px;
+		}
+
+		.top-row {
+			display: flex;
+			align-items: center;
+			justify-content: flex-end;
+			margin-bottom: 10px;
+		}
+
+		.user-chip {
+			display: inline-flex;
+			align-items: center;
+			gap: 10px;
+			padding: 8px 12px;
+			border-radius: 999px;
+			border: 1px solid var(--stroke);
+			background: rgba(255, 255, 255, 0.9);
+			box-shadow: 0 10px 26px rgba(15, 23, 42, 0.1);
+			font-size: 13px;
+		}
+
+		.logout-link {
+			text-decoration: none;
+			font-weight: 700;
+			color: #b91c1c;
+			padding: 5px 9px;
+			border-radius: 8px;
+			background: #fee2e2;
+		}
+
+		.logout-link:hover {
+			background: #fecaca;
 		}
 
 		.title {
@@ -382,11 +424,18 @@ if ($apiDir !== false) {
 			.stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 			.grid { grid-template-columns: 1fr; }
 			.tester { grid-template-columns: 1fr; }
+			.top-row { justify-content: center; }
 		}
 	</style>
 </head>
 <body>
 	<div class="wrap">
+		<div class="top-row">
+			<div class="user-chip">
+				<span>Login: <?php echo htmlspecialchars($sessionUsername, ENT_QUOTES, 'UTF-8'); ?></span>
+				<a id="logoutLink" class="logout-link" href="logout.php">Logout</a>
+			</div>
+		</div>
 		<header class="top">
 			<h1 class="title">API Hub</h1>
 			<p class="sub">Dashboard dokumentasi endpoint dinamis langsung dari project kamu.</p>
@@ -464,6 +513,7 @@ if ($apiDir !== false) {
 
 	<script>
 		const serverEndpoints = <?php echo json_encode($serverEndpoints, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>;
+		const sessionApiKey = <?php echo json_encode($sessionApiKey, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>;
 		const localKeyEndpoints = 'custom_endpoints_v1';
 		const localKeyCopies = 'total_copy_count_v1';
 		const localKeyApiKey = 'api_key';
@@ -498,6 +548,7 @@ if ($apiDir !== false) {
 		const customUrl = document.getElementById('customUrl');
 		const customDesc = document.getElementById('customDesc');
 		const customNeedKey = document.getElementById('customNeedKey');
+		const logoutLink = document.getElementById('logoutLink');
 
 		function getCustomEndpoints() {
 			try {
@@ -793,7 +844,14 @@ if ($apiDir !== false) {
 			}
 		});
 
-		tryApiKeyEl.value = localStorage.getItem(localKeyApiKey) || '';
+		if (sessionApiKey) {
+			localStorage.setItem(localKeyApiKey, sessionApiKey);
+		}
+		tryApiKeyEl.value = sessionApiKey || localStorage.getItem(localKeyApiKey) || '';
+
+		logoutLink.addEventListener('click', function () {
+			localStorage.removeItem(localKeyApiKey);
+		});
 		refreshDashboard();
 	</script>
 </body>
