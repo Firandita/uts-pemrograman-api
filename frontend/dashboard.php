@@ -26,7 +26,6 @@ function method_color(string $method): string
 		'GET' => '#16a34a',
 		'POST' => '#2563eb',
 		'PUT' => '#ca8a04',
-		'PATCH' => '#7c3aed',
 		'DELETE' => '#dc2626',
 	];
 	return $map[$method] ?? '#475569';
@@ -496,7 +495,6 @@ if ($apiDir !== false) {
 				<option>GET</option>
 				<option>POST</option>
 				<option>PUT</option>
-				<option>PATCH</option>
 				<option>DELETE</option>
 			</select>
 			<input id="customUrl" class="field" placeholder="https://... atau /backend/api/..." required>
@@ -523,7 +521,6 @@ if ($apiDir !== false) {
 			GET: '#16a34a',
 			POST: '#2563eb',
 			PUT: '#ca8a04',
-			PATCH: '#7c3aed',
 			DELETE: '#dc2626'
 		};
 
@@ -606,7 +603,7 @@ if ($apiDir !== false) {
 				tryMethodEl.appendChild(opt);
 			});
 			if (uniqueMethods.length === 0) {
-				const fallback = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
+				const fallback = ['GET', 'POST', 'PUT', 'DELETE'];
 				fallback.forEach(method => {
 					const opt = document.createElement('option');
 					opt.value = method;
