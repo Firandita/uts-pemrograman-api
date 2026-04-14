@@ -31,6 +31,7 @@ switch ($method) {
         break;
 
    case 'POST':
+
      
         $input = json_decode(file_get_contents("php://input"), true);
         
@@ -47,11 +48,13 @@ switch ($method) {
             break;
         }
 
+
         $sql = "INSERT INTO menu_items (nama_item, size, category, harga, notes) 
                 VALUES ('$nama_item', '$size', '$category', '$harga', '$notes')";
         
         if(mysqli_query($conn, $sql)) {
             http_response_code(201); 
+
             echo json_encode(["status" => "success", "message" => "Menu berhasil ditambah"]);
         } else {
             http_response_code(500);
@@ -130,6 +133,5 @@ switch ($method) {
         http_response_code(405);
         echo json_encode(["status" => "error", "message" => "Method tidak didukung"]);
         break;
-
 }
 ?>

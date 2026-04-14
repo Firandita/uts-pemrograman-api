@@ -341,6 +341,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 					if (data.api_key) {
     				const username = document.getElementById('username').value.trim();
     				localStorage.setItem('api_key_' + username, data.api_key);
+					
 					}
 
 					const text = (data.message || 'Login berhasil!') +

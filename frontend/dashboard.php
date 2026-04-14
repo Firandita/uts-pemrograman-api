@@ -849,6 +849,7 @@ if ($apiDir !== false) {
     		}
 }
 				} catch (err) {
+
 				}
 
 				responseBox.textContent = [
@@ -862,7 +863,7 @@ if ($apiDir !== false) {
 				responseBox.textContent = 'Request gagal: ' + (err && err.message ? err.message : 'Unknown error');
 			}
 		});
-
+		
 		if (sessionApiKey && !localStorage.getItem(localKeyApiKey)) {
    		localStorage.setItem(localKeyApiKey, sessionApiKey);
 		}
